@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import nodemailer from "nodemailer";
 
+if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY environment variable is not set");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const FRONTEND_URL = process.env.FRONTEND_URL;
 if (!FRONTEND_URL) throw new Error("FRONTEND_URL environment variable is not set");
