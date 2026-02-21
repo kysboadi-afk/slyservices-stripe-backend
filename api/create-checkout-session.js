@@ -2,6 +2,8 @@ import Stripe from "stripe";
 import nodemailer from "nodemailer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const FRONTEND_URL = process.env.FRONTEND_URL;
+if (!FRONTEND_URL) throw new Error("FRONTEND_URL environment variable is not set");
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -15,7 +17,7 @@ const transporter = nodemailer.createTransport({
 
 export default async function handler(req, res) {
   // ✅ CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "https://kysboadi-afk.github.io");
+  res.setHeader("Access-Control-Allow-Origin", FRONTEND_URL);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -45,11 +47,12 @@ export default async function handler(req, res) {
         },
       ],
       customer_email: email,
-      success_url: "https://kysboadi-afk.github.io/MY-Car-rental/success.html",
-      cancel_url: "https://kysboadi-afk.github.io/MY-Car-rental/cancel.html",
+      success_url: `${FRONTEND_URL}/MY-Car-rental/success.html`,
+      cancel_url: `${FRONTEND_URL}/MY-Car-rental/cancel.html`,
       metadata: {
         pickup,
         returnDate,
+        business_email: "slyservices@supports-info.com",
       },
     });
 
