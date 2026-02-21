@@ -1,5 +1,8 @@
 import nodemailer from "nodemailer";
 
+const FRONTEND_URL = process.env.FRONTEND_URL;
+if (!FRONTEND_URL) throw new Error("Required environment variable FRONTEND_URL is not set. This is needed for CORS configuration.");
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -11,7 +14,7 @@ function escapeHtml(value) {
 
 export default async function handler(req, res) {
   // ✅ CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "https://kysboadi-afk.github.io");
+  res.setHeader("Access-Control-Allow-Origin", FRONTEND_URL);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
