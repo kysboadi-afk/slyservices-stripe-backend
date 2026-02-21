@@ -1,6 +1,17 @@
 import Stripe from "stripe";
+import nodemailer from "nodemailer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 export default async function handler(req, res) {
   // ✅ CORS headers
@@ -43,6 +54,29 @@ export default async function handler(req, res) {
     });
 
     res.status(200).json({ url: session.url });
+
+    // Send confirmation emails (non-blocking)
+    const sanitize = (val) => String(val).replace(/[\r\n]/g, " ");
+    const emailBody = `
+Car: ${sanitize(car)}
+Amount: $${sanitize(amount)}
+Pickup Date: ${sanitize(pickup)}
+Return Date: ${sanitize(returnDate)}
+    `.trim();
+
+    transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: process.env.OWNER_EMAIL,
+      subject: `New Booking: ${car}`,
+      text: `A new booking was submitted.\n\nCustomer: ${sanitize(email)}\n\n${emailBody}`,
+    }).catch((err) => console.error("Owner email error:", err));
+
+    transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: `Your Booking Confirmation – ${car}`,
+      text: `Thank you for your booking!\n\n${emailBody}\n\nComplete your payment here: ${session.url}`,
+    }).catch((err) => console.error("Customer email error:", err));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Stripe error" });
