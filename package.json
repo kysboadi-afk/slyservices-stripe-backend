@@ -2,7 +2,7 @@
   "name": "stripe-backend",
   "version": "1.0.0",
   "dependencies": {
-    "nodemailer": "^7.0.11",
+    "nodemailer": "^8.0.1",
     "stripe": "^14.0.0"
   }
 }
