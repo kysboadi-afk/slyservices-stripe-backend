@@ -8,6 +8,7 @@ Serverless backend for the SlyServices car rental booking flow. Built with [Verc
 
 | Method | Path | Description |
 |--------|------|-------------|
+| `GET`  | `/api/health` | Returns deployment status and lists which environment variables are configured / missing |
 | `POST` | `/api/create-checkout-session` | Creates a Stripe Checkout session and sends booking confirmation emails |
 | `POST` | `/api/send-reservation-email` | Sends a reservation confirmation email without a payment step |
 | `POST` | `/api/webhook` | Receives Stripe webhook events; sends owner notification on payment completion |
@@ -99,7 +100,27 @@ After adding environment variables, trigger a new deployment:
 
 ### 6. Verify
 
-Test the live endpoints with `curl` or Postman:
+**Step 1 — Health check (open in your browser or run with curl):**
+
+```bash
+curl https://<your-vercel-domain>/api/health
+```
+
+A fully configured deployment returns:
+
+```json
+{ "status": "ok" }
+```
+
+If any variables are missing, the response will be `500` and list them:
+
+```json
+{ "status": "misconfigured", "missing": ["STRIPE_WEBHOOK_SECRET"] }
+```
+
+Add any missing variables in Vercel **Settings → Environment Variables** and redeploy.
+
+**Step 2 — End-to-end checkout test:**
 
 ```bash
 curl -X POST https://<your-vercel-domain>/api/create-checkout-session \
