@@ -35,6 +35,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    const amountInCents = Math.round(Number(amount) * 100);
+    if (!Number.isFinite(amountInCents) || amountInCents < 50) {
+      return res.status(400).json({ error: "Invalid amount: must be a positive number (minimum $0.50)" });
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -43,7 +48,7 @@ export default async function handler(req, res) {
           price_data: {
             currency: "usd",
             product_data: { name: car },
-            unit_amount: amount * 100, // Stripe requires cents
+            unit_amount: amountInCents,
           },
           quantity: 1,
         },
