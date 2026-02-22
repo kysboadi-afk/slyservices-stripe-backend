@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import nodemailer from "nodemailer";
 
 if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+if (!/^sk_(live|test)_/.test(process.env.STRIPE_SECRET_KEY)) throw new Error("Invalid STRIPE_SECRET_KEY format: must start with sk_live_ or sk_test_");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const FRONTEND_URL = process.env.FRONTEND_URL;
 if (!FRONTEND_URL) throw new Error("FRONTEND_URL environment variable is not set");
