@@ -39,6 +39,11 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Server email configuration error" });
     }
 
+    if (!process.env.OWNER_EMAIL) {
+      console.error("Missing OWNER_EMAIL environment variable");
+      return res.status(500).json({ error: "Server email configuration error" });
+    }
+
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT) || 587,
@@ -64,6 +69,23 @@ export default async function handler(req, res) {
         </ul>
       `,
     });
+
+    transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: process.env.OWNER_EMAIL,
+      subject: `New Reservation Request: ${escapeHtml(car)}`,
+      html: `
+        <h2>New Reservation Request</h2>
+        <p>A customer has submitted a reservation request without payment.</p>
+        <ul>
+          <li><strong>Customer Email:</strong> ${escapeHtml(email)}</li>
+          <li><strong>Car:</strong> ${escapeHtml(car)}</li>
+          <li><strong>Pickup Date:</strong> ${escapeHtml(pickup)}</li>
+          <li><strong>Return Date:</strong> ${escapeHtml(returnDate)}</li>
+          <li><strong>Total:</strong> $${escapeHtml(amount)}</li>
+        </ul>
+      `,
+    }).catch((err) => console.error("Owner notification email error for customer %s car %s:", escapeHtml(email), escapeHtml(car), err));
 
     res.status(200).json({ message: "Reservation email sent" });
   } catch (err) {
