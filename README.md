@@ -10,6 +10,7 @@ Serverless backend for the SlyServices car rental booking flow. Built with [Verc
 |--------|------|-------------|
 | `POST` | `/api/create-checkout-session` | Creates a Stripe Checkout session and sends booking confirmation emails |
 | `POST` | `/api/send-reservation-email` | Sends a reservation confirmation email without a payment step |
+| `POST` | `/api/webhook` | Receives Stripe webhook events; sends owner notification on payment completion |
 
 ---
 
@@ -20,6 +21,7 @@ Copy `.env.example` to `.env` and fill in all values before deploying.
 | Variable | Description |
 |----------|-------------|
 | `STRIPE_SECRET_KEY` | Stripe secret key (`sk_live_…` for production, `sk_test_…` for test mode) |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret from Stripe Dashboard → Webhooks → your endpoint → **Signing secret** |
 | `FRONTEND_URL` | Full URL of your frontend (e.g. `https://your-site.com`). Used for CORS and Stripe redirect URLs |
 | `SMTP_HOST` | SMTP hostname (e.g. `smtp.gmail.com`) |
 | `SMTP_PORT` | SMTP port (default `587`) |
@@ -73,16 +75,29 @@ vercel env add SMTP_PORT
 vercel env add SMTP_USER
 vercel env add SMTP_PASS
 vercel env add OWNER_EMAIL
+# Complete step 4 first to obtain your webhook signing secret, then run:
+vercel env add STRIPE_WEBHOOK_SECRET
 ```
 
-### 4. Redeploy to apply environment variables
+### 4. Register the Stripe webhook
+
+1. In the [Stripe Dashboard](https://dashboard.stripe.com/webhooks), click **"Add endpoint"**.
+2. Set the **Endpoint URL** to:
+   ```
+   https://<your-vercel-domain>/api/webhook
+   ```
+3. Under **Events to send**, select `checkout.session.completed`.
+4. Click **Add endpoint**, then copy the **Signing secret** (starts with `whsec_`).
+5. Add it to Vercel as the `STRIPE_WEBHOOK_SECRET` environment variable (see step 3 above).
+
+### 5. Redeploy to apply environment variables
 
 After adding environment variables, trigger a new deployment:
 
 - **Dashboard:** Project → **Deployments** → **Redeploy** on the latest deployment.
 - **CLI:** `vercel --prod`
 
-### 5. Verify
+### 6. Verify
 
 Test the live endpoints with `curl` or Postman:
 
