@@ -18,5 +18,6 @@ export default function handler(req, res) {
   res.status(ok ? 200 : 500).json({
     status: ok ? "ok" : "misconfigured",
     ...(missing.length > 0 && { missing }),
+    meta_pixel: process.env.META_PIXEL_ID ? "configured" : "not configured",
   });
 }
