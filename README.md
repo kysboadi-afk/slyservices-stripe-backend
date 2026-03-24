@@ -9,6 +9,7 @@ Serverless backend for the SlyServices car rental booking flow. Built with [Verc
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET`  | `/api/health` | Returns deployment status and lists which environment variables are configured / missing |
+| `GET`  | `/api/pixel` | Serves the Meta Pixel base code as `text/javascript` (returns 204 if `META_PIXEL_ID` is not set) |
 | `POST` | `/api/create-checkout-session` | Creates a Stripe Checkout session and sends booking confirmation emails |
 | `POST` | `/api/send-reservation-email` | Sends a reservation confirmation email without a payment step |
 | `POST` | `/api/webhook` | Receives Stripe webhook events; sends owner notification on payment completion |
@@ -29,6 +30,7 @@ Copy `.env.example` to `.env` and fill in all values before deploying.
 | `SMTP_USER` | SMTP username / sending email address |
 | `SMTP_PASS` | SMTP password or app password |
 | `OWNER_EMAIL` | Email address that receives booking notifications |
+| `META_PIXEL_ID` | *(Optional)* Numeric Meta Pixel ID from Meta Business Manager → Events Manager. Leave blank to disable tracking. |
 
 ---
 
@@ -145,3 +147,49 @@ vercel dev             # starts a local dev server on http://localhost:3000
 ```
 
 > **Note:** `vercel dev` requires the Vercel CLI and a linked project (`vercel link`).
+
+---
+
+## Meta Pixel Head Tracking
+
+The `/api/pixel` endpoint serves the standard Meta (Facebook) Pixel base code as a JavaScript file. This lets you wire up head tracking on your website with a single `<script>` tag — no need to hard-code the Pixel ID into your frontend HTML.
+
+### 1. Set the environment variable
+
+In the Vercel dashboard (Project → **Settings** → **Environment Variables**) add:
+
+| Variable | Value |
+|----------|-------|
+| `META_PIXEL_ID` | Your numeric Pixel ID from [Meta Business Manager → Events Manager](https://business.facebook.com/events_manager) |
+
+Or with the CLI:
+
+```bash
+vercel env add META_PIXEL_ID
+```
+
+### 2. Add one `<script>` tag to the `<head>` of your main page
+
+Paste the snippet below inside the `<head>` of `slytrans.com` (or any page you want to track). Replace `BACKEND_URL` with your Vercel deployment URL (e.g. `https://slyservices-stripe-backend.vercel.app`).
+
+```html
+<!-- Meta Pixel – head tracking -->
+<script src="BACKEND_URL/api/pixel" async></script>
+<noscript>
+  <img height="1" width="1" style="display:none"
+       src="https://www.facebook.com/tr?id=YOUR_META_PIXEL_ID&ev=PageView&noscript=1" />
+</noscript>
+<!-- End Meta Pixel -->
+```
+
+> **Tip:** Replace `YOUR_META_PIXEL_ID` in the `<noscript>` fallback with the same numeric ID you set in `META_PIXEL_ID`.
+
+### 3. Verify
+
+Open `/api/health` — the response now includes a `meta_pixel` field:
+
+```json
+{ "status": "ok", "meta_pixel": "configured" }
+```
+
+If the Pixel ID is not set it shows `"not configured"` and the endpoint returns `204 No Content` (page load is never blocked).
