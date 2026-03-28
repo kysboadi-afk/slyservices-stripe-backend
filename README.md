@@ -167,7 +167,27 @@ Use **JPG** format and keep each file under **1 MB** for fast page loads.
 
 ### How to add them to the card slideshow
 
-After uploading, open `slingshot.html` in the frontend repository and add each new `<img>` tag (or slide entry) inside the existing image gallery/carousel component for the Slingshot card. Do **not** modify the hero banner image at the top of the page.
+After uploading, open `slingshot.html` in the frontend repository (`kysboadi-afk/SLY-RIDES`) and update the gallery section (search for `id="gallery"`).
+
+The gallery grid currently has two cards. The second card is a placeholder duplicate — replace its `src` with the new image:
+
+**Before:**
+```html
+<div class="sl-gallery-item sl-fade-in sl-fade-in-delay-1">
+  <img src="images/slingshot.jpg" alt="Polaris Slingshot R side view" loading="lazy">
+</div>
+```
+
+**After:**
+```html
+<div class="sl-gallery-item sl-fade-in sl-fade-in-delay-1">
+  <img src="images/slingshot-2.jpg" alt="Polaris Slingshot R side view" loading="lazy">
+</div>
+```
+
+To add a third image, append another `<div class="sl-gallery-item sl-fade-in">` block after the second one inside `<div class="sl-gallery-grid">`.
+
+Do **not** modify the hero banner image (`images/slingshot.jpg`) at the top of the page or the wide first card in the gallery.
 
 ---
 
