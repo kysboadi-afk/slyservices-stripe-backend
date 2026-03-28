@@ -143,23 +143,21 @@ The Slingshot booking card on `slytrans.com/slingshot.html` displays a photo sli
 
 ### Where to upload new images
 
-Place all Slingshot vehicle photos in this folder inside the **frontend repository**:
+Place all Slingshot vehicle photos directly in the `images/` folder inside the **frontend repository** (`kysboadi-afk/SLY-RIDES`):
 
 ```
-images/slingshot/
+images/
 ```
-
-If that folder does not exist yet, create it.
 
 ### How to name the files
 
 Keep names lowercase, hyphen-separated, and numbered sequentially so the frontend can reference them easily:
 
 ```
-images/slingshot/slingshot-1.jpg   ← existing hero/main photo (do NOT rename or replace)
-images/slingshot/slingshot-2.jpg   ← new photo
-images/slingshot/slingshot-3.jpg   ← new photo
-images/slingshot/slingshot-4.jpg   ← new photo
+images/slingshot.jpg    ← existing hero/main photo (do NOT rename or replace)
+images/slingshot-2.jpg  ← new photo (already uploaded ✅)
+images/slingshot-3.jpg  ← next photo
+images/slingshot-4.jpg  ← next photo
 …
 ```
 
@@ -193,7 +191,7 @@ Do **not** modify the hero banner image (`images/slingshot.jpg`) at the top of t
 
 ## Slingshot Booking — Owner Notification Email
 
-In addition to the standard `OWNER_EMAIL` notification, every Slingshot booking (reservation, checkout, or confirmed payment) automatically sends a copy to the address set in the `SLINGSHOT_OWNER_EMAIL` environment variable (e.g. `Armani@armanichristmassolutions.llc`).
+In addition to the standard `OWNER_EMAIL` notification, every Slingshot booking (reservation, checkout, or confirmed payment) automatically sends a copy to the address set in the `SLINGSHOT_OWNER_EMAIL` environment variable.
 
 Set this variable in your Vercel project settings:
 
