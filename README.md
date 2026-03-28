@@ -29,6 +29,7 @@ Copy `.env.example` to `.env` and fill in all values before deploying.
 | `SMTP_USER` | SMTP username / sending email address |
 | `SMTP_PASS` | SMTP password or app password |
 | `OWNER_EMAIL` | Email address that receives booking notifications |
+| `SLINGSHOT_OWNER_EMAIL` | Additional email that receives booking notifications for Slingshot bookings only (e.g. `Armani@armanichristmassolutions.llc`) |
 
 ---
 
@@ -133,6 +134,54 @@ A successful response returns a Stripe Checkout URL:
 ```json
 { "url": "https://checkout.stripe.com/..." }
 ```
+
+---
+
+## Slingshot Page — Adding Images to the Card Gallery
+
+The Slingshot booking card on `slytrans.com/slingshot.html` displays a photo slideshow. Images live in the **frontend repository** (the site that hosts `slingshot.html`), not in this backend.
+
+### Where to upload new images
+
+Place all Slingshot vehicle photos in this folder inside the **frontend repository**:
+
+```
+images/slingshot/
+```
+
+If that folder does not exist yet, create it.
+
+### How to name the files
+
+Keep names lowercase, hyphen-separated, and numbered sequentially so the frontend can reference them easily:
+
+```
+images/slingshot/slingshot-1.jpg   ← existing hero/main photo (do NOT rename or replace)
+images/slingshot/slingshot-2.jpg   ← new photo
+images/slingshot/slingshot-3.jpg   ← new photo
+images/slingshot/slingshot-4.jpg   ← new photo
+…
+```
+
+Use **JPG** format and keep each file under **1 MB** for fast page loads.
+
+### How to add them to the card slideshow
+
+After uploading, open `slingshot.html` in the frontend repository and add each new `<img>` tag (or slide entry) inside the existing image gallery/carousel component for the Slingshot card. Do **not** modify the hero banner image at the top of the page.
+
+---
+
+## Slingshot Booking — Owner Notification Email
+
+In addition to the standard `OWNER_EMAIL` notification, every Slingshot booking (reservation, checkout, or confirmed payment) automatically sends a copy to the address set in the `SLINGSHOT_OWNER_EMAIL` environment variable (e.g. `Armani@armanichristmassolutions.llc`).
+
+Set this variable in your Vercel project settings:
+
+```bash
+vercel env add SLINGSHOT_OWNER_EMAIL
+```
+
+This is handled in `api/send-reservation-email.js`, `api/create-checkout-session.js`, and `api/webhook.js`. No code changes are needed to update the address later — just update the environment variable and redeploy.
 
 ---
 

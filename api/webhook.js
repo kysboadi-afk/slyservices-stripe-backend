@@ -57,22 +57,36 @@ export default async function handler(req, res) {
       const amountFormatted = session.amount_total != null
         ? `$${(session.amount_total / 100).toFixed(2)}`
         : "N/A";
+      const carName = sanitize(session.metadata?.car ?? "");
+
+      const ownerEmailText = [
+        "A payment was successfully completed.",
+        "",
+        `Session ID:   ${sanitize(session.id)}`,
+        `Customer:     ${sanitize(session.customer_email)}`,
+        `Amount Paid:  ${amountFormatted}`,
+        `Car:          ${carName}`,
+        `Pickup:       ${sanitize(session.metadata?.pickup)}`,
+        `Return:       ${sanitize(session.metadata?.returnDate)}`,
+      ].join("\n");
+      const ownerEmailSubject = `Payment Confirmed – ${sanitize(session.metadata?.pickup ?? "booking")}`;
 
       // Non-blocking: Stripe already received a 200, so send email without delaying the response
       transporter.sendMail({
         from: process.env.SMTP_USER,
         to: process.env.OWNER_EMAIL,
-        subject: `Payment Confirmed – ${sanitize(session.metadata?.pickup ?? "booking")}`,
-        text: [
-          "A payment was successfully completed.",
-          "",
-          `Session ID:   ${sanitize(session.id)}`,
-          `Customer:     ${sanitize(session.customer_email)}`,
-          `Amount Paid:  ${amountFormatted}`,
-          `Pickup:       ${sanitize(session.metadata?.pickup)}`,
-          `Return:       ${sanitize(session.metadata?.returnDate)}`,
-        ].join("\n"),
+        subject: ownerEmailSubject,
+        text: ownerEmailText,
       }).catch((err) => console.error("Owner payment-confirmed email error:", err));
+
+      if (carName.toLowerCase().includes("slingshot") && process.env.SLINGSHOT_OWNER_EMAIL) {
+        transporter.sendMail({
+          from: process.env.SMTP_USER,
+          to: process.env.SLINGSHOT_OWNER_EMAIL,
+          subject: ownerEmailSubject,
+          text: ownerEmailText,
+        }).catch((err) => console.error("Slingshot owner payment-confirmed email error:", err));
+      }
     }
   }
 

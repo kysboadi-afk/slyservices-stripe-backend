@@ -57,6 +57,7 @@ export default async function handler(req, res) {
       success_url: `${FRONTEND_URL}/MY-Car-rental/success.html`,
       cancel_url: `${FRONTEND_URL}/MY-Car-rental/cancel.html`,
       metadata: {
+        car,
         pickup,
         returnDate,
         business_email: "slyservices@supports-info.com",
@@ -74,12 +75,24 @@ Pickup Date: ${sanitize(pickup)}
 Return Date: ${sanitize(returnDate)}
     `.trim();
 
+    const ownerEmailText = `A new booking was submitted.\n\nCustomer: ${sanitize(email)}\n\n${emailBody}`;
+    const ownerEmailSubject = `New Booking: ${car}`;
+
     transporter.sendMail({
       from: process.env.SMTP_USER,
       to: process.env.OWNER_EMAIL,
-      subject: `New Booking: ${car}`,
-      text: `A new booking was submitted.\n\nCustomer: ${sanitize(email)}\n\n${emailBody}`,
+      subject: ownerEmailSubject,
+      text: ownerEmailText,
     }).catch((err) => console.error("Owner email error:", err));
+
+    if (String(car).toLowerCase().includes("slingshot") && process.env.SLINGSHOT_OWNER_EMAIL) {
+      transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: process.env.SLINGSHOT_OWNER_EMAIL,
+        subject: ownerEmailSubject,
+        text: ownerEmailText,
+      }).catch((err) => console.error("Slingshot owner email error:", err));
+    }
 
     transporter.sendMail({
       from: process.env.SMTP_USER,
