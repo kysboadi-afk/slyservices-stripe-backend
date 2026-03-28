@@ -139,40 +139,42 @@ A successful response returns a Stripe Checkout URL:
 
 ## Slingshot Page — Gallery Status & Fix
 
-The Slingshot booking card on `slytrans.com/slingshot.html` displays a photo gallery. Images live in the **frontend repository** (`kysboadi-afk/SLY-RIDES`), not in this backend.
+The Slingshot booking card on `slytrans.com/slingshot.html` displays a photo gallery. The live site files live in **`public/`** inside the frontend repository (`kysboadi-afk/SLY-RIDES`).
 
-**Current status (verified 2026-03-28):**
+**Current status (re-verified 2026-03-28):**
 
 | Step | Status | Detail |
 |------|--------|--------|
-| Upload `slingshot-2.jpg` to `SLY-RIDES/images/` | ✅ Done | File exists and is a different photo from `slingshot.jpg` |
-| Update `slingshot.html` second gallery card to use `slingshot-2.jpg` | ❌ Remaining | Both cards still reference `images/slingshot.jpg` |
+| `public/slingshot.html` second card changed to `slingshot-2.jpg` | ✅ Done | PR #316 applied |
+| `public/images/slingshot-2.jpg` exists | ❌ Missing | File is in root `images/` but **not** in `public/images/` — broken image |
+| Fleet photos uploaded to `public/images/` | ✅ Done | `IMG_1749.jpeg`, `IMG_1750.jpeg`, `IMG_1751.jpeg` added |
 
-> ⚠️ **One action required** — `slingshot-2.jpg` is already uploaded. The only remaining step is to update the HTML so the second gallery card displays the correct image.
+> ⚠️ **One action required** — `public/slingshot.html` already references `images/slingshot-2.jpg`, but that file doesn't exist in `public/images/`. The gallery second card shows a broken image. Fix it by updating the HTML to point to one of the fleet photos that was just uploaded.
 
 ---
 
-### Fix — Update the second gallery card in `slingshot.html`
+### Fix — Point the second gallery card to an uploaded fleet photo
 
-1. Open **[https://github.com/kysboadi-afk/SLY-RIDES/blob/main/slingshot.html](https://github.com/kysboadi-afk/SLY-RIDES/blob/main/slingshot.html)** in your browser.
+1. Open **[https://github.com/kysboadi-afk/SLY-RIDES/blob/main/public/slingshot.html](https://github.com/kysboadi-afk/SLY-RIDES/blob/main/public/slingshot.html)** in your browser.
 2. Click the **pencil icon ✏️** (top-right of the file viewer) to edit.
 3. Press **Ctrl+F** (or Cmd+F on Mac) and search for:
    ```
    Polaris Slingshot R side view
    ```
-4. You will find this block (around line 837–839):
-   ```html
-   <div class="sl-gallery-item sl-fade-in sl-fade-in-delay-1">
-     <img src="images/slingshot.jpg" alt="Polaris Slingshot R side view" loading="lazy">
-   </div>
-   ```
-5. Change **only** `images/slingshot.jpg` on that line to `images/slingshot-2.jpg`:
+4. You will find this block (around line 836–838):
    ```html
    <div class="sl-gallery-item sl-fade-in sl-fade-in-delay-1">
      <img src="images/slingshot-2.jpg" alt="Polaris Slingshot R side view" loading="lazy">
    </div>
    ```
-6. Scroll down, add a commit message like `"Fix gallery: show slingshot-2.jpg in second card"`, and click **"Commit changes"**.
+5. Change `images/slingshot-2.jpg` to whichever fleet photo you prefer (all three are now in `public/images/`):
+   ```html
+   <div class="sl-gallery-item sl-fade-in sl-fade-in-delay-1">
+     <img src="images/IMG_1749.jpeg" alt="Polaris Slingshot R side view" loading="lazy">
+   </div>
+   ```
+   > Use `IMG_1749.jpeg`, `IMG_1750.jpeg`, or `IMG_1751.jpeg` — whichever photo looks best in the second slot.
+6. Scroll down, add a commit message like `"Fix gallery: use IMG_1749 fleet photo in second card"`, and click **"Commit changes"**.
 
 The page will now show two different Slingshot photos in the gallery. ✅
 
@@ -184,11 +186,11 @@ To add a **third card**, append this block inside `<div class="sl-gallery-grid">
 
 ```html
 <div class="sl-gallery-item sl-fade-in sl-fade-in-delay-2">
-  <img src="images/slingshot-3.jpg" alt="Polaris Slingshot R fleet" loading="lazy">
+  <img src="images/IMG_1750.jpeg" alt="Polaris Slingshot R fleet" loading="lazy">
 </div>
 ```
 
-Then upload `slingshot-3.jpg` to `SLY-RIDES/images/` the same way `slingshot-2.jpg` was uploaded.
+Upload any additional photos to **`public/images/`** in the `SLY-RIDES` repo.
 
 > **Do not** change the hero banner image (`images/slingshot.jpg`) at the top of the page or the wide first gallery card.
 
