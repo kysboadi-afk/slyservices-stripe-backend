@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { isSlingshotBooking } from "./_utils.js";
 
 const FRONTEND_URL = process.env.FRONTEND_URL;
 if (!FRONTEND_URL) throw new Error("Required environment variable FRONTEND_URL is not set. This is needed for CORS configuration.");
@@ -90,7 +91,7 @@ export default async function handler(req, res) {
       html: ownerEmailHtml,
     }).catch((err) => console.error("Owner notification email error for customer %s car %s:", escapeHtml(email), escapeHtml(car), err));
 
-    if (String(car).toLowerCase().includes("slingshot") && process.env.SLINGSHOT_OWNER_EMAIL) {
+    if (isSlingshotBooking(car) && process.env.SLINGSHOT_OWNER_EMAIL) {
       transporter.sendMail({
         from: process.env.SMTP_USER,
         to: process.env.SLINGSHOT_OWNER_EMAIL,

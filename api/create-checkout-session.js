@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import nodemailer from "nodemailer";
+import { isSlingshotBooking } from "./_utils.js";
 
 if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY environment variable is not set");
 if (!/^sk_(live|test)_/.test(process.env.STRIPE_SECRET_KEY)) throw new Error("Invalid STRIPE_SECRET_KEY format: must start with sk_live_ or sk_test_");
@@ -85,7 +86,7 @@ Return Date: ${sanitize(returnDate)}
       text: ownerEmailText,
     }).catch((err) => console.error("Owner email error:", err));
 
-    if (String(car).toLowerCase().includes("slingshot") && process.env.SLINGSHOT_OWNER_EMAIL) {
+    if (isSlingshotBooking(car) && process.env.SLINGSHOT_OWNER_EMAIL) {
       transporter.sendMail({
         from: process.env.SMTP_USER,
         to: process.env.SLINGSHOT_OWNER_EMAIL,
