@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import nodemailer from "nodemailer";
+import { isSlingshotBooking } from "./_utils.js";
 
 if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY environment variable is not set");
 if (!/^sk_(live|test)_/.test(process.env.STRIPE_SECRET_KEY)) throw new Error("Invalid STRIPE_SECRET_KEY format: must start with sk_live_ or sk_test_");
@@ -57,6 +58,7 @@ export default async function handler(req, res) {
       success_url: `${FRONTEND_URL}/MY-Car-rental/success.html`,
       cancel_url: `${FRONTEND_URL}/MY-Car-rental/cancel.html`,
       metadata: {
+        car,
         pickup,
         returnDate,
         business_email: "slyservices@supports-info.com",
@@ -74,12 +76,24 @@ Pickup Date: ${sanitize(pickup)}
 Return Date: ${sanitize(returnDate)}
     `.trim();
 
+    const ownerEmailText = `A new booking was submitted.\n\nCustomer: ${sanitize(email)}\n\n${emailBody}`;
+    const ownerEmailSubject = `New Booking: ${car}`;
+
     transporter.sendMail({
       from: process.env.SMTP_USER,
       to: process.env.OWNER_EMAIL,
-      subject: `New Booking: ${car}`,
-      text: `A new booking was submitted.\n\nCustomer: ${sanitize(email)}\n\n${emailBody}`,
+      subject: ownerEmailSubject,
+      text: ownerEmailText,
     }).catch((err) => console.error("Owner email error:", err));
+
+    if (isSlingshotBooking(car) && process.env.SLINGSHOT_OWNER_EMAIL) {
+      transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: process.env.SLINGSHOT_OWNER_EMAIL,
+        subject: ownerEmailSubject,
+        text: ownerEmailText,
+      }).catch((err) => console.error("Slingshot owner email error:", err));
+    }
 
     transporter.sendMail({
       from: process.env.SMTP_USER,

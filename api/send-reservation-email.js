@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { isSlingshotBooking } from "./_utils.js";
 
 const FRONTEND_URL = process.env.FRONTEND_URL;
 if (!FRONTEND_URL) throw new Error("Required environment variable FRONTEND_URL is not set. This is needed for CORS configuration.");
@@ -70,11 +71,7 @@ export default async function handler(req, res) {
       `,
     });
 
-    transporter.sendMail({
-      from: process.env.SMTP_USER,
-      to: process.env.OWNER_EMAIL,
-      subject: `New Reservation Request: ${escapeHtml(car)}`,
-      html: `
+    const ownerEmailHtml = `
         <h2>New Reservation Request</h2>
         <p>A customer has submitted a reservation request without payment.</p>
         <ul>
@@ -84,8 +81,24 @@ export default async function handler(req, res) {
           <li><strong>Return Date:</strong> ${escapeHtml(returnDate)}</li>
           <li><strong>Total:</strong> $${escapeHtml(amount)}</li>
         </ul>
-      `,
+      `;
+    const ownerEmailSubject = `New Reservation Request: ${escapeHtml(car)}`;
+
+    transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: process.env.OWNER_EMAIL,
+      subject: ownerEmailSubject,
+      html: ownerEmailHtml,
     }).catch((err) => console.error("Owner notification email error for customer %s car %s:", escapeHtml(email), escapeHtml(car), err));
+
+    if (isSlingshotBooking(car) && process.env.SLINGSHOT_OWNER_EMAIL) {
+      transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: process.env.SLINGSHOT_OWNER_EMAIL,
+        subject: ownerEmailSubject,
+        html: ownerEmailHtml,
+      }).catch((err) => console.error("Slingshot owner notification email error for customer %s:", escapeHtml(email), err));
+    }
 
     res.status(200).json({ message: "Reservation email sent" });
   } catch (err) {
